@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import argparse
+import os
 
 
 def argument_parser() -> argparse.ArgumentParser:
@@ -34,6 +35,23 @@ def argument_parser() -> argparse.ArgumentParser:
                              "'docker://debian:buster-slim'")
     parser.add_argument("-d", "--cache-dir", required=False)
     return parser
+
+
+def get_cache_dir_from_env() -> str:
+    singularity_permanentcachedir = os.environ.get(
+        "SINGULARITY_PERMANENTCACHEDIR")
+    singularity_cachedir = os.environ.get("SINGULARITY_LOCALCACHEDIR")
+    user_home = os.path.expanduser('~')
+    if singularity_permanentcachedir:
+        return singularity_permanentcachedir
+    if singularity_cachedir:
+        return os.path.join(singularity_cachedir, "permanent_cache")
+    if user_home:
+        return os.path.join(user_home, ".singularity", "cache",
+                            "permanent_cache")
+    raise EnvironmentError("Cannot determine a permanent cache dir from the "
+                           "environment. Please set "
+                           "'SINGULARITY_PERMANENTCACHEDIR'.")
 
 
 def main():
