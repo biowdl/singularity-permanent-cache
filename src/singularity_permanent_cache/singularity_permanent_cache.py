@@ -22,6 +22,7 @@
 
 import argparse
 import fcntl
+import io
 import logging
 import os
 import subprocess
@@ -62,21 +63,14 @@ def get_cache_dir_from_env() -> Path:
 
 
 class SimpleUnixFileLock():
-    def __init__(self, lock_file: Path):
-        self._file = lock_file.open("w")
-        self._fd = self._file.fileno()
-        try:
-            fcntl.lockf(self._fd, fcntl.LOCK_EX)
-        except OSError as e:
-            self._file.close()
-            raise e
+    def __init__(self, fd: int):
+        self._fd = fd
 
     def __enter__(self):
-        return self
+        fcntl.lockf(self._fd, fcntl.LOCK_EX)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         fcntl.lockf(self._fd, fcntl.LOCK_UN)
-        self._file.close()
 
 
 def singularity_command(singularity_exe=DEFAULT_SINGULARITY_EXE, *args, **kwargs
