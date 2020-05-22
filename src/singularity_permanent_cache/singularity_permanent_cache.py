@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import argparse
+import fcntl
 import logging
 import os
 import subprocess
@@ -58,6 +59,24 @@ def get_cache_dir_from_env() -> Path:
         return Path(user_home, ".singularity", "cache", "permanent_cache")
     raise OSError("Cannot determine a permanent cache dir from the "
                   "environment. Please set 'SINGULARITY_PERMANENTCACHEDIR'.")
+
+
+class SimpleUnixFileLock():
+    def __init__(self, lock_file: Path):
+        self._file = lock_file.open("w")
+        self._fd = self._file.fileno()
+        try:
+            fcntl.lockf(self._fd, fcntl.LOCK_EX)
+        except OSError as e:
+            self._file.close()
+            raise e
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        fcntl.lockf(self._fd, fcntl.LOCK_UN)
+        self._file.close()
 
 
 def singularity_command(singularity_exe=DEFAULT_SINGULARITY_EXE, *args, **kwargs
