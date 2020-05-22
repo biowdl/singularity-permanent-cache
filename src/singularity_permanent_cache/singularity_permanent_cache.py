@@ -26,6 +26,8 @@ import os
 import subprocess
 from pathlib import Path
 
+DEFAULT_SINGULARITY_EXE = "singularity"
+
 
 def argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -37,8 +39,9 @@ def argument_parser() -> argparse.ArgumentParser:
                         help="The singularity URI to the image. For example: "
                              "'docker://debian:buster-slim'")
     parser.add_argument("-d", "--cache-dir", required=False)
-    parser.add_argument("-v", "--verbose", action="count", default=0)
-    parser.add_argument("-q", "--quiet", action="count", default=0)
+    parser.add_argument("-s", "--singularity-exe", type=str, )
+    parser.add_argument("-v", "--verbose", action="count", type=int, default=0)
+    parser.add_argument("-q", "--quiet", action="count", type=int, default=0)
     return parser
 
 
@@ -57,11 +60,11 @@ def get_cache_dir_from_env() -> Path:
                   "environment. Please set 'SINGULARITY_PERMANENTCACHEDIR'.")
 
 
-def singularity_command(singularity_exe="singularity", *args, **kwargs
+def singularity_command(singularity_exe=DEFAULT_SINGULARITY_EXE, *args, **kwargs
                         ) -> subprocess.CompletedProcess:
     result = subprocess.run([singularity_exe] + list(args),
-                            stderr = subprocess.PIPE,
-                            stdout= subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            stdout=subprocess.PIPE,
                             check=True,
                             **kwargs)
     return result
@@ -69,6 +72,14 @@ def singularity_command(singularity_exe="singularity", *args, **kwargs
 
 def uri_to_filename(uri: str) -> str:
     return uri.replace("://", "_").replace("/", "_").replace(":", "_")
+
+
+def pull_image_to_cache(uri: str, cache_location: Path,
+                        singularity_exe=DEFAULT_SINGULARITY_EXE) -> Path:
+    image_path = Path(cache_location, uri_to_filename(uri))
+    if not image_path.exists():
+        singularity_command(singularity_exe, "pull", str(image_path), uri)
+    return image_path
 
 
 def main():
