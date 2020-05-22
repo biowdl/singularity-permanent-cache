@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Copyright (c) 2020 Leiden University Medical Center
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,6 +20,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .singularity_permanent_cache import main
+import argparse
 
-__ALL__ = ["main"]
+
+def argument_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Creates a permanent cache on disk for singularity "
+                    "images. WARNING: This program will never check if a "
+                    "newer image is available. Make sure unique tags or "
+                    "hashes are used!")
+    parser.add_argument("uri", metavar="IMAGE",
+                        help="The singularity URI to the image. For example: "
+                             "'docker://debian:buster-slim'")
+    parser.add_argument("-d", "--cache-dir", required=False)
+    return parser
+
+
+def main():
+    args = argument_parser().parse_args()
+
+
+if __name__ == "__main__":
+    main()

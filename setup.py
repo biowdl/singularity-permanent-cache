@@ -47,4 +47,10 @@ setup(
         "License :: OSI Approved :: MIT License"
     ],
     python_requires=">=3.5",  # Because we use typing.
+    entry_points={
+        'console_scripts': [
+            'singularity-permanent-cache = singularity_permanent_cache:main',
+            # 'spc = singularity_permanent_cache:main',
+        ],
+    },
 )
