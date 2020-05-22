@@ -20,31 +20,34 @@
 
 import time
 import threading
+from pathlib import Path
 import random
 import tempfile
+import multiprocessing
 
 from singularity_permanent_cache import SimpleUnixFileLock
 
 
 def test_filelock():
     count = 20
-    order = []
-    random_wait_times = [random.random() / 10 for i in range(count)]
+    random_wait_times = [random.random() for i in range(count)]
     fd, _ = tempfile.mkstemp()
-    filelock = SimpleUnixFileLock(fd)
+    _, count_file = tempfile.mkstemp()
+    filelock = multiprocessing.Lock()
 
     def add_number(number: int, wait_time: float):
         with filelock:
-            time.sleep(wait_time)
-            order.append(number)
+            with open(count_file, "a") as count_h:
+                time.sleep(wait_time)
+                count_h.write(str(number) + '\n')
 
     threads = []
     for i, wait_time in enumerate(random_wait_times):
-        thread = threading.Thread(target=add_number, args=(i, wait_time))
+        thread = multiprocessing.Process(target=add_number, args=(i, wait_time))
         thread.start()
         threads.append(thread)
 
     for thread in threads:
         thread.join()
-
-    assert order == list(range(count))
+    executed_order = [int(line) for line in Path(count_file).read_text().splitlines()]
+    assert executed_order == list(range(count))
