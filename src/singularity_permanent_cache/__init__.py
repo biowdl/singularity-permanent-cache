@@ -18,6 +18,4 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .singularity_permanent_cache import main
-
-__ALL__ = ["main"]
+from .singularity_permanent_cache import *

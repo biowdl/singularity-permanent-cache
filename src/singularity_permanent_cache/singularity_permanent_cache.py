@@ -22,6 +22,7 @@
 
 import argparse
 import os
+from pathlib import Path
 
 
 def argument_parser() -> argparse.ArgumentParser:
@@ -37,21 +38,19 @@ def argument_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def get_cache_dir_from_env() -> str:
+def get_cache_dir_from_env() -> Path:
     singularity_permanentcachedir = os.environ.get(
         "SINGULARITY_PERMANENTCACHEDIR")
-    singularity_cachedir = os.environ.get("SINGULARITY_LOCALCACHEDIR")
-    user_home = os.path.expanduser('~')
+    singularity_cachedir = os.environ.get("SINGULARITY_CACHEDIR")
+    user_home = os.path.expanduser("~")
     if singularity_permanentcachedir:
-        return singularity_permanentcachedir
+        return Path(singularity_permanentcachedir)
     if singularity_cachedir:
-        return os.path.join(singularity_cachedir, "permanent_cache")
+        return Path(singularity_cachedir, "permanent_cache")
     if user_home:
-        return os.path.join(user_home, ".singularity", "cache",
-                            "permanent_cache")
-    raise EnvironmentError("Cannot determine a permanent cache dir from the "
-                           "environment. Please set "
-                           "'SINGULARITY_PERMANENTCACHEDIR'.")
+        return Path(user_home, ".singularity", "cache", "permanent_cache")
+    raise OSError("Cannot determine a permanent cache dir from the "
+                  "environment. Please set 'SINGULARITY_PERMANENTCACHEDIR'.")
 
 
 def main():
