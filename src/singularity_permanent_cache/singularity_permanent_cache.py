@@ -21,7 +21,9 @@
 # SOFTWARE.
 
 import argparse
+import logging
 import os
+import subprocess
 from pathlib import Path
 
 
@@ -35,6 +37,8 @@ def argument_parser() -> argparse.ArgumentParser:
                         help="The singularity URI to the image. For example: "
                              "'docker://debian:buster-slim'")
     parser.add_argument("-d", "--cache-dir", required=False)
+    parser.add_argument("-v", "--verbose", action="count", default=0)
+    parser.add_argument("-q", "--quiet", action="count", default=0)
     return parser
 
 
@@ -53,9 +57,25 @@ def get_cache_dir_from_env() -> Path:
                   "environment. Please set 'SINGULARITY_PERMANENTCACHEDIR'.")
 
 
+def singularity_command(singularity_exe="singularity", *args, **kwargs
+                        ) -> subprocess.CompletedProcess:
+    result = subprocess.run([singularity_exe] + list(args),
+                            stderr = subprocess.PIPE,
+                            stdout= subprocess.PIPE,
+                            check=True,
+                            **kwargs)
+    return result
+
+
+def uri_to_filename(uri: str) -> str:
+    return uri.replace("://", "_").replace("/", "_").replace(":", "_")
+
+
 def main():
     args = argument_parser().parse_args()
-
+    log_level = logging.WARNING + (args.verbose - args.quiet) * 10
+    log = logging.getLogger()
+    log.setLevel(log_level)
 
 if __name__ == "__main__":
     main()
