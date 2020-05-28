@@ -18,10 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import os
 from pathlib import Path
-
-import pytest
 
 from singularity_permanent_cache import get_cache_dir_from_env
 
@@ -44,13 +41,3 @@ def test_get_cache_dir_from_env_perm_cachedir_set(monkeypatch):
     perm_cache_dir = Path("permanent")
     monkeypatch.setenv("SINGULARITY_PERMANENTCACHEDIR", str(perm_cache_dir))
     assert get_cache_dir_from_env() == perm_cache_dir
-
-
-# TODO: Fix test below to test error.
-# def test_get_cache_dir_from_env_noenv(monkeypatch):
-#     for env in ("HOME", "SINGULARITY_CACHEDIR", "USER",
-#                 "SINGULARITY_PERMANENTCACHEDIR"):
-#         monkeypatch.delenv(env, raising=False)
-#     with pytest.raises(OSError) as error:
-#         _ = get_cache_dir_from_env()
-#     error.match("Please set SINGULARITY_PERMANENTCACHEDIR")

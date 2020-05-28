@@ -18,11 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import random
 import subprocess
 import tempfile
-import time
-import datetime
 from pathlib import Path
 
 
@@ -30,7 +27,7 @@ def test_filelock():
     count = 5
     lockfile = tempfile.mktemp()
     _, execution_times_file = tempfile.mkstemp()
-    Path(execution_times_file).write_text("") # make sure the file exists
+    Path(execution_times_file).write_text("")  # make sure the file exists
 
     # this script uses the implemented filelock. It waits one second
     # after acquiring the lock and then writes the current time (in seconds) to
@@ -48,6 +45,7 @@ def test_filelock():
 
     # Get the epoch time (in seconds) from the file. If the lock does not work
     # We expect multiple processes to have executed at the same time.
+    # We use a set comprehension to collapse times that are the same.
     execution_times = {int(line) for line in
                        Path(execution_times_file).read_text().splitlines()}
     assert len(execution_times) == count
