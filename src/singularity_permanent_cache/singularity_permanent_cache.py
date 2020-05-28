@@ -65,17 +65,18 @@ def get_cache_dir_from_env() -> Path:
 class SimpleUnixFileLock:
     def __init__(self, file: str):
         self._file = file
-        self._handle = None
         self._fd = None
+        self.open_mode = os.O_RDWR | os.O_CREAT | os.O_TRUNC
 
     def __enter__(self):
-        self._handle = open(self._file, "wb")
-        self._fd = self._handle.fileno()
-        fcntl.lockf(self._fd, fcntl.LOCK_EX)
+        self._fd = os.open(self._file, self.open_mode)
+        fcntl.flock(self._fd, fcntl.LOCK_EX)
+        print(f"lock acquired for: {self._file}")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        fcntl.lockf(self._fd, fcntl.LOCK_UN)
-        self._handle.close()
+        fcntl.flock(self._fd, fcntl.LOCK_UN)
+        os.close(self._fd)
+        print(f"lock released for: {self._file}")
 
 
 def singularity_command(singularity_exe=DEFAULT_SINGULARITY_EXE, *args, **kwargs

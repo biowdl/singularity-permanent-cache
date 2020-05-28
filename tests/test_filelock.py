@@ -22,25 +22,32 @@ import random
 import subprocess
 import tempfile
 import time
+import datetime
 from pathlib import Path
 
 
 def test_filelock():
-    count = 20
-    random_wait_times = [random.random() for _ in range(count)]
-    tmpfile = tempfile.mktemp()
-    _, count_file = tempfile.mkstemp()
-    with open(count_file, "wt") as count_h:
-        count_h.write("")
+    count = 5
+    lockfile = tempfile.mktemp()
+    _, execution_times_file = tempfile.mkstemp()
+    Path(execution_times_file).write_text("") # make sure the file exists
 
+    # this script uses the implemented filelock. It waits one second
+    # after acquiring the lock and then writes the current time (in seconds) to
+    # a file.
     filelockscript = Path(__file__).parent / "lockscript.py"
 
-    processes = []
-    for i, wait_time in enumerate(random_wait_times):
-        processes.append(subprocess.Popen([str(filelockscript), tmpfile, str(wait_time), count_file, str(i)]))
-        time.sleep(0.1)
+    # Start all the processes in quick succession.
+    processes = [subprocess.Popen([str(filelockscript), lockfile,
+                                   execution_times_file])
+                 for _ in range(count)]
 
+    # Wait on all processes to finish.
     for process in processes:
         process.wait()
-    executed_order = [int(line) for line in Path(count_file).read_text().splitlines()]
-    assert executed_order == list(range(count))
+
+    # Get the epoch time (in seconds) from the file. If the lock does not work
+    # We expect multiple processes to have executed at the same time.
+    execution_times = {int(line) for line in
+                       Path(execution_times_file).read_text().splitlines()}
+    assert len(execution_times) == count
