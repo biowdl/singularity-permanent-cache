@@ -46,6 +46,6 @@ def test_filelock():
     # Get the epoch time (in seconds) from the file. If the lock does not work
     # We expect multiple processes to have executed at the same time.
     # We use a set comprehension to collapse times that are the same.
-    execution_times = {int(line) for line in
+    execution_times = {float(line) for line in
                        Path(execution_times_file).read_text().splitlines()}
     assert len(execution_times) == count
