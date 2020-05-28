@@ -62,15 +62,20 @@ def get_cache_dir_from_env() -> Path:
                   "environment. Please set 'SINGULARITY_PERMANENTCACHEDIR'.")
 
 
-class SimpleUnixFileLock():
-    def __init__(self, fd: int):
-        self._fd = fd
+class SimpleUnixFileLock:
+    def __init__(self, file: str):
+        self._file = file
+        self._handle = None
+        self._fd = None
 
     def __enter__(self):
+        self._handle = open(self._file, "wb")
+        self._fd = self._handle.fileno()
         fcntl.lockf(self._fd, fcntl.LOCK_EX)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         fcntl.lockf(self._fd, fcntl.LOCK_UN)
+        self._handle.close()
 
 
 def singularity_command(singularity_exe=DEFAULT_SINGULARITY_EXE, *args, **kwargs

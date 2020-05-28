@@ -18,39 +18,29 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import time
-import threading
-from pathlib import Path
 import random
+import subprocess
 import tempfile
-import multiprocessing
-
-from singularity_permanent_cache import SimpleUnixFileLock
+import time
+from pathlib import Path
 
 
 def test_filelock():
     count = 20
-    random_wait_times = [random.random() / 10 for _ in range(count)]
-    fd, _ = tempfile.mkstemp()
+    random_wait_times = [random.random() for _ in range(count)]
+    tmpfile = tempfile.mktemp()
     _, count_file = tempfile.mkstemp()
-    filelock = multiprocessing.Lock()
+    with open(count_file, "wt") as count_h:
+        count_h.write("")
 
-    def add_number(number: int, wait_time: float):
-        with filelock:
-            with open(count_file, "a") as count_h:
-                time.sleep(wait_time)
-                count_h.write(str(number) + '\n')
+    filelockscript = Path(__file__).parent / "lockscript.py"
 
-    threads = []
+    processes = []
     for i, wait_time in enumerate(random_wait_times):
-        thread = multiprocessing.Process(target=add_number, args=(i, wait_time))
-        thread.start()
-        # Wait a small amount of time between starting each process
-        # Even multiprocessing.Lock() does not work correctly otherwise.
-        time.sleep(0.003)
-        threads.append(thread)
+        processes.append(subprocess.Popen([str(filelockscript), tmpfile, str(wait_time), count_file, str(i)]))
+        time.sleep(0.1)
 
-    for thread in threads:
-        thread.join()
+    for process in processes:
+        process.wait()
     executed_order = [int(line) for line in Path(count_file).read_text().splitlines()]
     assert executed_order == list(range(count))
