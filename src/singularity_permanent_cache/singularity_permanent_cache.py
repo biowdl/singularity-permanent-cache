@@ -67,16 +67,17 @@ class SimpleUnixFileLock:
         self._file = file
         self._fd = None
         self.open_mode = os.O_RDWR | os.O_CREAT | os.O_TRUNC
+        self.log = logging.getLogger()
 
     def __enter__(self):
         self._fd = os.open(self._file, self.open_mode)
         fcntl.flock(self._fd, fcntl.LOCK_EX)
-        print(f"lock acquired for: {self._file}")
+        self.log.debug(f"lock acquired for: {self._file}")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         fcntl.flock(self._fd, fcntl.LOCK_UN)
         os.close(self._fd)
-        print(f"lock released for: {self._file}")
+        self.log.debug(f"lock released for: {self._file}")
 
 
 def singularity_command(singularity_exe=DEFAULT_SINGULARITY_EXE, *args, **kwargs
