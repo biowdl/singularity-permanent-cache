@@ -30,7 +30,7 @@ from singularity_permanent_cache import SimpleUnixFileLock
 
 def test_filelock():
     count = 20
-    random_wait_times = [random.random() for i in range(count)]
+    random_wait_times = [random.random() / 10 for _ in range(count)]
     fd, _ = tempfile.mkstemp()
     _, count_file = tempfile.mkstemp()
     filelock = multiprocessing.Lock()
@@ -45,6 +45,9 @@ def test_filelock():
     for i, wait_time in enumerate(random_wait_times):
         thread = multiprocessing.Process(target=add_number, args=(i, wait_time))
         thread.start()
+        # Wait a small amount of time between starting each process
+        # Even multiprocessing.Lock() does not work correctly otherwise.
+        time.sleep(0.003)
         threads.append(thread)
 
     for thread in threads:
