@@ -18,4 +18,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .singularity_permanent_cache import *
+# We use this for simpler importing. This way singularity_permanent_cache.py
+# can be used as a stand-alone script and as a package.
+from .singularity_permanent_cache import *  # noqa

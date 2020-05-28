@@ -22,7 +22,6 @@
 
 import argparse
 import fcntl
-import io
 import logging
 import os
 import subprocess
@@ -80,7 +79,8 @@ class SimpleUnixFileLock:
         self.log.debug(f"lock released for: {self._file}")
 
 
-def singularity_command(singularity_exe=DEFAULT_SINGULARITY_EXE, *args, **kwargs
+def singularity_command(
+        singularity_exe=DEFAULT_SINGULARITY_EXE, *args, **kwargs
                         ) -> subprocess.CompletedProcess:
     result = subprocess.run([singularity_exe] + list(args),
                             stderr=subprocess.PIPE,
@@ -107,6 +107,7 @@ def main():
     log_level = logging.WARNING + (args.verbose - args.quiet) * 10
     log = logging.getLogger()
     log.setLevel(log_level)
+
 
 if __name__ == "__main__":
     main()
