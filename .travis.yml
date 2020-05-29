@@ -4,6 +4,7 @@ install:
   - sudo apt-key adv --recv-keys --keyserver hkp://pool.sks-keyservers.net:80 0xA5D32F012649A5A9
   - sudo apt update
   - sudo apt install singularity-container
+  - singularity version  # for debugging
   - pip install tox
 dist: bionic
 python: 3.5  # Use the oldest supported version of python as default.
