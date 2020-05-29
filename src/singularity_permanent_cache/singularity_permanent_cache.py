@@ -34,7 +34,8 @@ DEFAULT_SINGULARITY_EXE = "singularity"
 def argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Creates a permanent cache on disk for singularity "
-                    "images. WARNING: This program will never check if a "
+                    "images. Returns the location of the image in the cache. "
+                    "WARNING: This program will never check if a "
                     "newer image is available. Make sure unique tags or "
                     "hashes are used!")
     parser.add_argument("uri", metavar="<IMAGE>", type=str,
