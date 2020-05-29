@@ -17,15 +17,20 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
-from pathlib import Path
+import os
 import sys
 import tempfile
 import threading
 import time
+from pathlib import Path
+
 import pytest
 
-from singularity_permanent_cache import get_cache_dir_from_env, uri_to_filename, main, SimpleUnixFileLock
+from singularity_permanent_cache import (SimpleUnixFileLock,
+                                         get_cache_dir_from_env,
+                                         main,
+                                         pull_image_to_cache,
+                                         uri_to_filename)
 
 # CACHE DIR TESTS
 
@@ -108,6 +113,48 @@ def test_filelock():
     assert len(execution_times) == count
 
 
+def test_pull_image_to_cache(caplog, monkeypatch):
+    caplog.set_level(0)
+    cache_dir = Path(tempfile.mktemp())
+    monkeypatch.setenv("SINGULARITY_PERMANENTCACHEDIR", str(cache_dir))
+    assert not cache_dir.exists()
+    pull_image_to_cache("docker://hello-world")
+    assert cache_dir.exists()
+    assert (cache_dir / "docker_hello-world.sif").exists()
+    assert (cache_dir / ".lock").exists()
+    messages = "|".join(caplog.messages)  # Join to allow substring matching.
+    assert "Cache dir from environment:" in messages
+    assert "Cache dir does not yet exist" in messages
+    assert "Start pulling image" in messages
+    assert "Waiting for file lock" in messages
+    assert "Lock acquired" in messages
+    assert "Lock released" in messages
+    assert "Image exists already at" not in messages
+
+
+def test_pull_image_to_existing_cache(caplog, monkeypatch):
+    caplog.set_level(0)
+    cache_dir = Path(tempfile.mktemp())
+    assert not cache_dir.exists()
+    pull_image_to_cache("docker://hello-world", cache_dir)
+    os.remove(cache_dir / ".lock")
+    assert (cache_dir / "docker_hello-world.sif").exists()
+
+    # Run again with clear log
+    caplog.clear()
+    pull_image_to_cache("docker://hello-world", cache_dir)
+
+    assert (cache_dir / "docker_hello-world.sif").exists()
+    assert not (cache_dir / ".lock").exists()
+    messages = "|".join(caplog.messages)  # Join to allow substring matching.
+    assert "Cache dir from environment:" not in messages
+    assert "Cache dir does not yet exist" not in messages
+    assert "Start pulling image" not in messages
+    assert "Waiting for file lock" not in messages
+    assert "Lock acquired" not in messages
+    assert "Lock released" not in messages
+    assert "Image exists already at" in messages
+
 
 # Main program
 @pytest.fixture()
@@ -120,11 +167,11 @@ def main_args():
             "docker://hello-world"]  # hello-world because it is small.
 
 
-def test_main(main_args, caplog):
+def test_main(main_args):
     sys.argv = main_args
     cache_dir = Path(main_args[3])
     assert not cache_dir.exists()
     main()
     assert cache_dir.exists()
+    assert Path(cache_dir, ".lock").exists()
     assert Path(cache_dir, "docker_hello-world.sif").exists()
-
