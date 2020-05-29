@@ -18,7 +18,7 @@ script:
 matrix:
   include:
     - env: TOX_ENV=lint
-    - install:
+      install:
         - pip install tox
     # UNIT TESTS
     # On most recent versions of python.
