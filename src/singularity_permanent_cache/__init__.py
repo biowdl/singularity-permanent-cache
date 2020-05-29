@@ -18,6 +18,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# We use this for simpler importing. This way singularity_permanent_cache.py
-# can be used as a stand-alone script and as a package.
-from .singularity_permanent_cache import *  # noqa
+from .singularity_permanent_cache import (SimpleUnixFileLock,
+                                          get_cache_dir_from_env,
+                                          main,
+                                          pull_image_to_cache,
+                                          singularity_command,
+                                          uri_to_filename)
+
+__all__ = [
+    "SimpleUnixFileLock",
+    "get_cache_dir_from_env",
+    "main",
+    "pull_image_to_cache",
+    "singularity_command",
+    "uri_to_filename"
+]
