@@ -18,6 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# This makes the package usable while singularity_permanent_cache.py can also
+# be used as a stand-alone script.
 from .singularity_permanent_cache import (SimpleUnixFileLock,
                                           get_cache_dir_from_env,
                                           main,
