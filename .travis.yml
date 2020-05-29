@@ -3,7 +3,7 @@ install:
   # Install singularity from source
   - sudo apt update
   - >-
-    sudo apt install --no-install-recommends golang-1.10-go build-essential libssl-dev
+    sudo apt install --no-install-recommends golang-go build-essential libssl-dev
     uuid-dev libgpgme-dev squashfs-tools libseccomp-dev wget pkg-config git
     cryptsetup
   - export VERSION=3.4.2
