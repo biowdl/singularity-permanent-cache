@@ -20,7 +20,11 @@
 
 from pathlib import Path
 
-from singularity_permanent_cache import get_cache_dir_from_env
+import pytest
+
+from singularity_permanent_cache import get_cache_dir_from_env, uri_to_filename
+
+# CACHE DIR TESTS
 
 
 def test_get_cache_dir_from_env_home(monkeypatch):
@@ -41,3 +45,26 @@ def test_get_cache_dir_from_env_perm_cachedir_set(monkeypatch):
     perm_cache_dir = Path("permanent")
     monkeypatch.setenv("SINGULARITY_PERMANENTCACHEDIR", str(perm_cache_dir))
     assert get_cache_dir_from_env() == perm_cache_dir
+
+
+# URI tests
+URIS = [
+    ("docker://quay.io/biocontainers/bedtools:2.23.0--hdbcaa40_3",
+     "docker_quay.io_biocontainers_bedtools_2.23.0--hdbcaa40_3"),
+    ("docker://quay.io/biocontainers/"
+     "mulled-v2-002f51ea92721407ef440b921fb5940f424be842:"
+     "43ec6124f9f4f875515f9548733b8b4e5fed9aa6-0",
+     "docker_quay.io_biocontainers_mulled-v2-"
+     "002f51ea92721407ef440b921fb5940f424be842_"
+     "43ec6124f9f4f875515f9548733b8b4e5fed9aa6-0"),
+    ("docker://debian@sha256:"
+     "f05c05a218b7a4a5fe979045b1c8e2a9ec3524e5611ebfdd0ef5b8040f9008fa",
+     "docker_debian@sha256_"
+     "f05c05a218b7a4a5fe979045b1c8e2a9ec3524e5611ebfdd0ef5b8040f9008fa"
+     )
+]
+
+
+@pytest.mark.parametrize(["uri", "result"], URIS)
+def test_uri_to_filename(uri, result):
+    assert uri_to_filename(uri) == result
