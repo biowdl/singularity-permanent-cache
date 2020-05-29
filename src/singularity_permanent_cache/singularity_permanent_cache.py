@@ -149,7 +149,8 @@ def pull_image_to_cache(uri: str, cache_location: Optional[Path] = None,
         cache = cache_location
 
     if not cache.exists():
-        log.info("Creating cache dir: {0}".format(str(cache)))
+        log.warning("Cache dir does not yet exist. "
+                    "Creating cache dir: {0}".format(str(cache)))
         cache.mkdir(parents=True)
 
     image_path = Path(cache, uri_to_filename(uri)).with_suffix(".sif")
@@ -167,8 +168,9 @@ def pull_image_to_cache(uri: str, cache_location: Optional[Path] = None,
 
 def main():
     args = argument_parser().parse_args()
-    log_level = max(logging.WARNING + (args.verbose - args.quiet) * 10, 0)
-    log = logging.getLogger()
+    log_level = max(logging.WARNING + (args.quiet - args.verbose) * 10, 0)
+    log = logging.getLogger()  # gets the root logger.
+    logging.basicConfig()  # This adds the default handler to the root logger.
     log.setLevel(log_level)
     cache_dir = Path(args.cache_dir) if args.cache_dir is not None else None
     image_path = pull_image_to_cache(args.uri, cache_dir,
