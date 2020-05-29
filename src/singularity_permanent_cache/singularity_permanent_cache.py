@@ -26,6 +26,7 @@ import logging
 import os
 import subprocess
 from pathlib import Path
+from typing import Optional
 
 DEFAULT_SINGULARITY_EXE = "singularity"
 
@@ -71,12 +72,12 @@ class SimpleUnixFileLock:
     def __enter__(self):
         self._fd = os.open(self._file, self.open_mode)
         fcntl.flock(self._fd, fcntl.LOCK_EX)
-        self.log.debug(f"lock acquired for: {self._file}")
+        self.log.debug("lock acquired for: {0}".format(self._file))
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         fcntl.flock(self._fd, fcntl.LOCK_UN)
         os.close(self._fd)
-        self.log.debug(f"lock released for: {self._file}")
+        self.log.debug("lock released for: {0}".format(self._file))
 
 
 def singularity_command(
@@ -94,11 +95,24 @@ def uri_to_filename(uri: str) -> str:
     return uri.replace("://", "_").replace("/", "_").replace(":", "_")
 
 
-def pull_image_to_cache(uri: str, cache_location: Path,
+def pull_image_to_cache(uri: str, cache_location: Optional[Path],
                         singularity_exe=DEFAULT_SINGULARITY_EXE) -> Path:
-    image_path = Path(cache_location, uri_to_filename(uri))
+    log = logging.getLogger()
+    if cache_location is None:
+        cache = get_cache_dir_from_env()
+        log.info("Cache dir from environment: {0}".format(cache))
+    else:
+        cache = cache_location
+    if not cache.exists():
+        log.info("Creating cache dir: {0}".format(str(cache)))
+        cache.mkdir(parents=True)
+    image_path = Path(cache, uri_to_filename(uri))
     if not image_path.exists():
+        log.info("Start pulling image {0} to location {1}"
+                 "".format(uri, str(image_path)))
         singularity_command(singularity_exe, "pull", str(image_path), uri)
+    else:
+        log.info("Image exists already at: {0}".format(str(image_path)))
     return image_path
 
 
