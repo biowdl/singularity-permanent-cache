@@ -118,10 +118,12 @@ def pull_image_to_cache(uri: str, cache_location: Optional[Path],
 
 def main():
     args = argument_parser().parse_args()
-    log_level = logging.WARNING + (args.verbose - args.quiet) * 10
+    log_level = max(logging.WARNING + (args.verbose - args.quiet) * 10, 0)
     log = logging.getLogger()
     log.setLevel(log_level)
-
+    image_path = pull_image_to_cache(args.uri, args.cache_dir,
+                                     args.singularity_exe)
+    print(image_path, end="")
 
 if __name__ == "__main__":
     main()
