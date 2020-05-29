@@ -1,6 +1,6 @@
 language: python
 install:
-  - sudo apt install singularity
+  - sudo apt install singularity-container
   - pip install tox
 dist: bionic
 python: 3.5  # Use the oldest supported version of python as default.
