@@ -137,7 +137,7 @@ def test_pull_image_to_existing_cache(caplog, monkeypatch):
     cache_dir = Path(tempfile.mktemp())
     assert not cache_dir.exists()
     pull_image_to_cache("docker://hello-world", cache_dir)
-    os.remove(cache_dir / ".lock")
+    os.remove(str(cache_dir / ".lock"))
     assert (cache_dir / "docker_hello-world.sif").exists()
 
     # Run again with clear log
