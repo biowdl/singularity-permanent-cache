@@ -19,10 +19,12 @@
 # SOFTWARE.
 
 from pathlib import Path
+import sys
+import tempfile
 
 import pytest
 
-from singularity_permanent_cache import get_cache_dir_from_env, uri_to_filename
+from singularity_permanent_cache import get_cache_dir_from_env, uri_to_filename, main
 
 # CACHE DIR TESTS
 
@@ -70,3 +72,25 @@ URIS = [
 @pytest.mark.parametrize(["uri", "result"], URIS)
 def test_uri_to_filename(uri, result):
     assert uri_to_filename(uri) == result
+
+
+
+# Main program
+@pytest.fixture()
+def main_args():
+    temporary_cache_dir = tempfile.mktemp()  # Only creates a path
+    return ["singularity-permanent-cache",
+            "-vvvq",  # Uses both q and v flags. Result is 2 vv == DEBUG.
+            "--cache-dir", temporary_cache_dir,
+            "-s", "singularity",
+            "docker://hello-world"]  # hello-world because it is small.
+
+
+def test_main(main_args, caplog):
+    sys.argv = main_args
+    cache_dir = Path(main_args[3])
+    assert not cache_dir.exists()
+    main()
+    assert cache_dir.exists()
+    assert Path(cache_dir, "docker_hello-world.sif").exists()
+
