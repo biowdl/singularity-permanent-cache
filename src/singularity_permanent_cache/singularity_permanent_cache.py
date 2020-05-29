@@ -37,13 +37,24 @@ def argument_parser() -> argparse.ArgumentParser:
                     "images. WARNING: This program will never check if a "
                     "newer image is available. Make sure unique tags or "
                     "hashes are used!")
-    parser.add_argument("uri", metavar="IMAGE",
+    parser.add_argument("uri", metavar="<IMAGE>", type=str,
                         help="The singularity URI to the image. For example: "
                              "'docker://debian:buster-slim'")
-    parser.add_argument("-d", "--cache-dir", required=False)
-    parser.add_argument("-s", "--singularity-exe", type=str, )
-    parser.add_argument("-v", "--verbose", action="count", type=int, default=0)
-    parser.add_argument("-q", "--quiet", action="count", type=int, default=0)
+    parser.add_argument("-d", "--cache-dir", required=False,
+                        help="Path to the cache location. Uses the "
+                             "SINGULARITY_PERMANENTCACHEDIR, "
+                             "or SINGULARITY_CACHEDIR environment variable "
+                             "by default.")
+    parser.add_argument("-s", "--singularity-exe", type=str,
+                        default=DEFAULT_SINGULARITY_EXE,
+                        help="Path to singularity executable.")
+    parser.add_argument("-v", "--verbose", action="count", default=0,
+                        help="Increase log verbosity. Can be used multiple "
+                             "times.")
+    parser.add_argument("-q", "--quiet", action="count", default=0,
+                        help="Decrease log verbosity. Can be used multiple "
+                             "times."
+                        )
     return parser
 
 
@@ -51,15 +62,13 @@ def get_cache_dir_from_env() -> Path:
     singularity_permanentcachedir = os.environ.get(
         "SINGULARITY_PERMANENTCACHEDIR")
     singularity_cachedir = os.environ.get("SINGULARITY_CACHEDIR")
-    user_home = os.path.expanduser("~")
     if singularity_permanentcachedir:
         return Path(singularity_permanentcachedir)
     if singularity_cachedir:
         return Path(singularity_cachedir, "permanent_cache")
-    if user_home:
-        return Path(user_home, ".singularity", "cache", "permanent_cache")
     raise OSError("Cannot determine a permanent cache dir from the "
-                  "environment. Please set 'SINGULARITY_PERMANENTCACHEDIR'.")
+                  "environment. Please set 'SINGULARITY_PERMANENTCACHEDIR' or "
+                  "'SINGULARITY_CACHEDIR.")
 
 
 class SimpleUnixFileLock:
@@ -131,15 +140,19 @@ def pull_image_to_cache(uri: str, cache_location: Optional[Path] = None,
     :return: path to the image location.
     """
     log = logging.getLogger()
+
     if cache_location is None:
         cache = get_cache_dir_from_env()
         log.info("Cache dir from environment: {0}".format(cache))
     else:
         cache = cache_location
+
     if not cache.exists():
         log.info("Creating cache dir: {0}".format(str(cache)))
         cache.mkdir(parents=True)
-    image_path = Path(cache, uri_to_filename(uri))
+
+    image_path = Path(cache, uri_to_filename(uri)).with_suffix(".sif")
+
     if not image_path.exists():
         log.info("Start pulling image {0} to location {1}"
                  "".format(uri, str(image_path)))
@@ -154,7 +167,8 @@ def main():
     log_level = max(logging.WARNING + (args.verbose - args.quiet) * 10, 0)
     log = logging.getLogger()
     log.setLevel(log_level)
-    image_path = pull_image_to_cache(args.uri, args.cache_dir,
+    cache_dir = Path(args.cache_dir) if args.cache_dir is not None else None
+    image_path = pull_image_to_cache(args.uri, cache_dir,
                                      args.singularity_exe)
     print(image_path, end="")
 

@@ -27,13 +27,6 @@ from singularity_permanent_cache import get_cache_dir_from_env, uri_to_filename
 # CACHE DIR TESTS
 
 
-def test_get_cache_dir_from_env_home(monkeypatch):
-    from singularity_permanent_cache import get_cache_dir_from_env
-    monkeypatch.setenv("HOME", "bla")
-    assert get_cache_dir_from_env() == Path("bla", ".singularity", "cache",
-                                            "permanent_cache")
-
-
 def test_get_cache_dir_from_env_sing_cachedir_set(monkeypatch):
     singularity_cache_dir = Path("singularity_cache")
     monkeypatch.setenv("SINGULARITY_CACHEDIR", str(singularity_cache_dir))
@@ -46,6 +39,15 @@ def test_get_cache_dir_from_env_perm_cachedir_set(monkeypatch):
     monkeypatch.setenv("SINGULARITY_PERMANENTCACHEDIR", str(perm_cache_dir))
     assert get_cache_dir_from_env() == perm_cache_dir
 
+
+def test_get_cache_dir_from_env_no_env(monkeypatch):
+    monkeypatch.delenv("SINGULARITY_CACHEDIR", raising=False)
+    monkeypatch.delenv("SINGULARITY_PERMANENTCACHEDIR", raising=False)
+    with pytest.raises(OSError) as error:
+        get_cache_dir_from_env()
+    error.match("Cannot determine a permanent cache dir from the environment.")
+    error.match("Please set 'SINGULARITY_PERMANENTCACHEDIR' or "
+                "'SINGULARITY_CACHEDIR.")
 
 # URI tests
 URIS = [

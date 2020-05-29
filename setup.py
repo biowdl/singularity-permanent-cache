@@ -50,7 +50,7 @@ setup(
     entry_points={
         'console_scripts': [
             'singularity-permanent-cache = singularity_permanent_cache:main',
-            # 'spc = singularity_permanent_cache:main',
+            'spc = singularity_permanent_cache:main',
         ],
     },
 )
