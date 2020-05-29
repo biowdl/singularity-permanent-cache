@@ -63,15 +63,26 @@ def get_cache_dir_from_env() -> Path:
 
 
 class SimpleUnixFileLock:
+    """
+    Simple UNIX filelock. Uses fnctl.flock for locking a file. Implementation
+    of https://github.com/benediktschmitt/py-filelock. This implementation
+    is simpler and does not have all the features. Huge thanks to
+    @benediktschmitt & contributors for this filelock example which they made
+    Public Domain.
+    """
     def __init__(self, file: str):
         self._file = file
         self._fd = None
+        # Open mode is a combination of RDWR CREATE and TRUNC. By using bitwise
+        # or symbol (|).
         self.open_mode = os.O_RDWR | os.O_CREAT | os.O_TRUNC
         self.log = logging.getLogger()
 
     def __enter__(self):
+        # Use os.open because it is much faster than python open.  It also only
+        # returns a file descriptor. Which is all that we need for locking.
         self._fd = os.open(self._file, self.open_mode)
-        fcntl.flock(self._fd, fcntl.LOCK_EX)
+        fcntl.flock(self._fd, fcntl.LOCK_EX)  # Exclusive lock
         self.log.debug("lock acquired for: {0}".format(self._file))
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -81,8 +92,15 @@ class SimpleUnixFileLock:
 
 
 def singularity_command(
-        singularity_exe=DEFAULT_SINGULARITY_EXE, *args, **kwargs
+        singularity_exe, *args, **kwargs
                         ) -> subprocess.CompletedProcess:
+    """
+    Execute a singularity command. Fails if singularity command fails.
+    :param singularity_exe: Path to singularity executable.
+    :param args: additional args for singularity.
+    :param kwargs: kwargs for subprocess.run
+    :return: a completed process.
+    """
     result = subprocess.run([singularity_exe] + list(args),
                             stderr=subprocess.PIPE,
                             stdout=subprocess.PIPE,
@@ -92,11 +110,26 @@ def singularity_command(
 
 
 def uri_to_filename(uri: str) -> str:
+    """
+    Replace characters that are forbidden on filesystems with underscores.
+    In URIs for singularity/docker images these are ':' and '/'.
+    :param uri: the uri for which characters are replaced.
+    :return: a valid filename.
+    """
     return uri.replace("://", "_").replace("/", "_").replace(":", "_")
 
 
-def pull_image_to_cache(uri: str, cache_location: Optional[Path],
+def pull_image_to_cache(uri: str, cache_location: Optional[Path] = None,
                         singularity_exe=DEFAULT_SINGULARITY_EXE) -> Path:
+    """
+    Pull image to the cache.
+    :param uri: Valid singularity image uri.
+    :param cache_location: Location to pull the image to. If not given tries
+                           to get the location from the environment.
+    :param singularity_exe: path to singularity, only necessary if singularity
+                            is not in PATH.
+    :return: path to the image location.
+    """
     log = logging.getLogger()
     if cache_location is None:
         cache = get_cache_dir_from_env()
