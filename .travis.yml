@@ -1,6 +1,7 @@
 language: python
 install:
   # Install singularity from source
+  - sudo apt update
   - >-
     sudo apt install --no-install-recommends golang-1.10-go build-essential libssl-dev
     uuid-dev libgpgme-dev squashfs-tools libseccomp-dev wget pkg-config git
