@@ -125,5 +125,6 @@ def main():
                                      args.singularity_exe)
     print(image_path, end="")
 
+
 if __name__ == "__main__":
     main()
