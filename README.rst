@@ -1,12 +1,19 @@
 singularity-permanent-cache
 ===========================
 
-Creates a permanent cache for singularity images on disk. It will use the
+Singularity-permanent-cache creates a permanent cache for singularity images on
+disk. It takes a URI as argument and returns the location of the image. It
+utilizes a filelock to prevent cache corruption.
+
+It will use the
 ``SINGULARITY_PERMANENTCACHEDIR`` or ``SINGULARITY_CACHEDIR`` environment
 variables to determine the location of the cache. Alternatively the cache dir
 can be set with the ``-d`` or ``--cache-dir`` flags on the command line.
 
-The ``singularity-permanent-cache`` command can be used in scripts:
+The ``singularity-permanent-cache`` command can be used in scripts. It was
+designed with multiprocess usage in mind: a filelock will prevent corruption
+of the cache when multiple instances of singularity-permanent-cache are
+running. It can be used in a script like this:
 
 .. code-block:: bash
 
@@ -17,9 +24,9 @@ The ``singularity-permanent-cache`` command can be used in scripts:
     MY_IMAGE_URI="docker://debian:buster-slim"
     IMAGE_LOCATION=$(singularity-permanent-cache $MY_IMAGE_URI)
 
-    singularity exec $IMAGE_LOCATION echo "Hello world!"
+    cluster_submit "singularity exec $IMAGE_LOCATION echo 'Hello world!'"
 
-``singularity-permanent-cache`` will download the debian buster slim image
+Singularity-permanent-cache will download the debian buster slim image
 if it is not yet in the cache. It will not dowload anything if it is already
 in the cache.
 
