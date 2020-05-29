@@ -91,13 +91,14 @@ class SimpleUnixFileLock:
         # Use os.open because it is much faster than python open.  It also only
         # returns a file descriptor. Which is all that we need for locking.
         self._fd = os.open(self._file, self.open_mode)
-        fcntl.flock(self._fd, fcntl.LOCK_EX)  # Exclusive lock
-        self.log.debug("lock acquired for: {0}".format(self._file))
+        self.log.info("Waiting for file lock on: {0}".format(self._file))
+        fcntl.flock(self._fd, fcntl.LOCK_EX)  # Exclusive lock, blocking
+        self.log.debug("Lock acquired: {0}".format(self._file))
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         fcntl.flock(self._fd, fcntl.LOCK_UN)
         os.close(self._fd)
-        self.log.debug("lock released for: {0}".format(self._file))
+        self.log.debug("Lock released: {0}".format(self._file))
 
 
 def singularity_command(
@@ -152,11 +153,13 @@ def pull_image_to_cache(uri: str, cache_location: Optional[Path] = None,
         cache.mkdir(parents=True)
 
     image_path = Path(cache, uri_to_filename(uri)).with_suffix(".sif")
+    lockfile_path = Path(cache, ".lock")
 
     if not image_path.exists():
-        log.info("Start pulling image {0} to location {1}"
-                 "".format(uri, str(image_path)))
-        singularity_command(singularity_exe, "pull", str(image_path), uri)
+        with SimpleUnixFileLock(str(lockfile_path)):
+            log.info("Start pulling image {0} to location {1}"
+                     "".format(uri, str(image_path)))
+            singularity_command(singularity_exe, "pull", str(image_path), uri)
     else:
         log.info("Image exists already at: {0}".format(str(image_path)))
     return image_path
