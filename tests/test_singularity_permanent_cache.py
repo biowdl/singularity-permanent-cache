@@ -32,8 +32,6 @@ from singularity_permanent_cache import (SimpleUnixFileLock,
                                          pull_image_to_cache,
                                          uri_to_filename)
 
-# CACHE DIR TESTS
-
 
 def test_get_cache_dir_from_env_sing_cachedir_set(monkeypatch):
     singularity_cache_dir = Path("singularity_cache")
@@ -175,3 +173,22 @@ def test_main(main_args):
     assert cache_dir.exists()
     assert Path(cache_dir, ".lock").exists()
     assert Path(cache_dir, "docker_hello-world.sif").exists()
+
+
+def test_which_cache(monkeypatch, capsys):
+    monkeypatch.setenv("SINGULARITY_PERMANENTCACHEDIR", "cache")
+    sys.argv = ["singularity-permanent-cache", "--which-cache"]
+    with pytest.raises(SystemExit):
+        main()
+    captured = capsys.readouterr()
+    assert "cache\n" == captured.out
+
+
+def test_which_cache_no_env(monkeypatch, capsys):
+    monkeypatch.delenv("SINGULARITY_CACHEDIR", raising=False)
+    monkeypatch.delenv("SINGULARITY_PERMANENTCACHEDIR", raising=False)
+    sys.argv = ["singularity-permanent-cache", "--which-cache"]
+    with pytest.raises(SystemExit):
+        main()
+    captured = capsys.readouterr()
+    assert "No cache could be determined from the environment." in captured.out

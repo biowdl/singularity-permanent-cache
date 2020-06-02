@@ -25,6 +25,7 @@ import fcntl
 import logging
 import os
 import subprocess
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -56,6 +57,7 @@ def argument_parser() -> argparse.ArgumentParser:
                         help="Decrease log verbosity. Can be used multiple "
                              "times."
                         )
+    parser.add_argument("--which-cache", action=_WhichCacheAction)
     return parser
 
 
@@ -70,6 +72,45 @@ def get_cache_dir_from_env() -> Path:
     raise OSError("Cannot determine a permanent cache dir from the "
                   "environment. Please set 'SINGULARITY_PERMANENTCACHEDIR' or "
                   "'SINGULARITY_CACHEDIR.")
+
+
+def which_cache() -> Optional[Path]:
+    try:
+        return get_cache_dir_from_env()
+    except OSError:
+        return None
+
+
+class _WhichCacheAction(argparse.Action):
+    # Blatant copy of version action.
+    # https://github.com/python/cpython/blob/55a6a16a46239a71b635584e532feb8b17ae7fdf/Lib/argparse.py#L1020
+    def __init__(self,
+                 option_strings,
+                 dest=argparse.SUPPRESS,
+                 default=argparse.SUPPRESS,
+                 help="Show which cache the program will use and exit."):
+        super(_WhichCacheAction, self).__init__(
+            option_strings=option_strings,
+            dest=dest,
+            default=default,
+            nargs=0,
+            help=help)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        cache = which_cache()
+        if cache is None:
+            message = ("No cache could be determined from the environment. "
+                       "Please set SINGULARITY_CACHEDIR, "
+                       "SINGULARITY_PERMANENTCACHEDIR or use command line "
+                       "flags to set the cache dir.")
+            status = 1
+        else:
+            message = str(cache)
+            status = 0
+        formatter = parser._get_formatter()
+        formatter.add_text(message)
+        parser._print_message(formatter.format_help(), sys.stdout)
+        parser.exit(status)
 
 
 class SimpleUnixFileLock:
