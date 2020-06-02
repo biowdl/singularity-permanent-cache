@@ -157,13 +157,15 @@ def pull_image_to_cache(uri: str, cache_location: Optional[Path] = None,
     image_path = Path(cache, uri_to_filename(uri)).with_suffix(".sif")
     lockfile_path = Path(cache, ".lock")
 
-    if not image_path.exists():
-        with SimpleUnixFileLock(str(lockfile_path)):
+    # Place the lock before the checking of image existence to prevent race
+    # conditions.
+    with SimpleUnixFileLock(str(lockfile_path)):
+        if not image_path.exists():
             log.info("Start pulling image {0} to location {1}"
                      "".format(uri, str(image_path)))
             singularity_command(singularity_exe, "pull", str(image_path), uri)
-    else:
-        log.info("Image exists already at: {0}".format(str(image_path)))
+        else:
+            log.info("Image exists already at: {0}".format(str(image_path)))
     return image_path
 
 

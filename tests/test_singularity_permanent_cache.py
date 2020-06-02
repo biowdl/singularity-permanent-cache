@@ -145,14 +145,14 @@ def test_pull_image_to_existing_cache(caplog, monkeypatch):
     pull_image_to_cache("docker://hello-world", cache_dir)
 
     assert (cache_dir / "docker_hello-world.sif").exists()
-    assert not (cache_dir / ".lock").exists()
+    assert (cache_dir / ".lock").exists()
     messages = "|".join(caplog.messages)  # Join to allow substring matching.
     assert "Cache dir from environment:" not in messages
     assert "Cache dir does not yet exist" not in messages
     assert "Start pulling image" not in messages
-    assert "Waiting for file lock" not in messages
-    assert "Lock acquired" not in messages
-    assert "Lock released" not in messages
+    assert "Waiting for file lock" in messages
+    assert "Lock acquired" in messages
+    assert "Lock released" in messages
     assert "Image exists already at" in messages
 
 
