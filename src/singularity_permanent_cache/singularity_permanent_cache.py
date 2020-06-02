@@ -163,7 +163,11 @@ def pull_image_to_cache(uri: str, cache_location: Optional[Path] = None,
         if not image_path.exists():
             log.info("Start pulling image {0} to location {1}"
                      "".format(uri, str(image_path)))
-            singularity_command(singularity_exe, "pull", str(image_path), uri)
+            # Pull to a temporary image first to prevent corruptions when the
+            # singularity command exits with errors.
+            image_tmp = image_path.with_suffix(".tmp")
+            singularity_command(singularity_exe, "pull", str(image_tmp), uri)
+            image_tmp.rename(image_path)
         else:
             log.info("Image exists already at: {0}".format(str(image_path)))
     return image_path
