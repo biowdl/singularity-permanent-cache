@@ -41,6 +41,12 @@ in the cache.
     <https://biocontainers.pro>`_ or use hashes. (For example:
     ``ubuntu@sha256:a69390df0911533dd2fc552a8765481bf6a93b5d5952a9ddbe9cb64ca3479e17``.)
 
+.. note::
+
+    singularity-permanent-cache utilizes a filelock which only works if
+    multiple singularity-permanent-cache processes are launched on the same
+    machine. If multiple processes are launched on multiple machines connected
+    to the same networked filesystem then cache corruption may occur.
 
 Usage
 ----------------
