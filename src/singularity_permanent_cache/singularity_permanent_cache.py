@@ -198,7 +198,7 @@ def pull_image_to_cache(uri: str, cache_location: Optional[Path] = None,
         # prevent race conditions will be difficult.
         cache.mkdir(parents=True, exist_ok=True)
 
-    image_path = Path(cache, uri_to_filename(uri)).with_suffix(".sif")
+    image_path = Path(cache, uri_to_filename(uri) + ".sif")
     lockfile_path = Path(cache, ".lock")
 
     # Place the lock before the checking of image existence to prevent race
