@@ -193,7 +193,10 @@ def pull_image_to_cache(uri: str, cache_location: Optional[Path] = None,
     if not cache.exists():
         log.warning("Cache dir does not yet exist. "
                     "Creating cache dir: {0}".format(str(cache)))
-        cache.mkdir(parents=True)
+        # Use exist_ok=True, as the path might already be created by a
+        # process running almost at the same time. Integrating a lock to
+        # prevent race conditions will be difficult.
+        cache.mkdir(parents=True, exist_ok=True)
 
     image_path = Path(cache, uri_to_filename(uri)).with_suffix(".sif")
     lockfile_path = Path(cache, ".lock")
