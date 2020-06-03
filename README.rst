@@ -61,8 +61,8 @@ python version (3.5 or higher).
 .. code-block::
 
     usage: singularity-permanent-cache [-h] [-d CACHE_DIR] [-s SINGULARITY_EXE]
-                                       [-v] [-q]
-                                       <IMAGE>
+                                   [--which-cache] [-v] [-q]
+                                   <IMAGE>
 
     Creates a permanent cache on disk for singularity images. Returns the location
     of the image in the cache. WARNING: This program will never check if a newer
@@ -80,6 +80,7 @@ python version (3.5 or higher).
                             environment variable by default.
       -s SINGULARITY_EXE, --singularity-exe SINGULARITY_EXE
                             Path to singularity executable.
+      --which-cache         Show which cache the program will use and exit.
       -v, --verbose         Increase log verbosity. Can be used multiple times.
       -q, --quiet           Decrease log verbosity. Can be used multiple times.
 

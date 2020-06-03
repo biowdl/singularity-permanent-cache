@@ -50,6 +50,7 @@ def argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("-s", "--singularity-exe", type=str,
                         default=DEFAULT_SINGULARITY_EXE,
                         help="Path to singularity executable.")
+    parser.add_argument("--which-cache", action=_WhichCacheAction)
     parser.add_argument("-v", "--verbose", action="count", default=0,
                         help="Increase log verbosity. Can be used multiple "
                              "times.")
@@ -57,7 +58,6 @@ def argument_parser() -> argparse.ArgumentParser:
                         help="Decrease log verbosity. Can be used multiple "
                              "times."
                         )
-    parser.add_argument("--which-cache", action=_WhichCacheAction)
     return parser
 
 
