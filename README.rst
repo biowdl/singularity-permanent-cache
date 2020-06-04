@@ -80,7 +80,7 @@ Usage
 Beside ``singularity-permanent-cache``, also ``spc`` is added to PATH as a
 short-hand when installing the package. ``singularity-permanent-cache`` is
 also available as a stand-alone script `singularity_permanent_cache.py
-<https://github.com/biowdl/singularity-permanent-cache/blob/develop/src/singularity_permanent_cache/singularity_permanent_cache.py>`_.
+<https://github.com/biowdl/singularity-permanent-cache/releases>`_.
 
 ``singularity-permant-cache`` has no dependencies and only requires a modern
 python version (3.5 or higher).
