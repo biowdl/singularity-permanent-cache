@@ -57,19 +57,23 @@ Singularity-permanent-cache will download the debian buster slim image
 if it is not yet in the cache. It will not dowload anything if it is already
 in the cache.
 
-Do not use ``singularity-permanent-cache`` on images with unstable tags
-such as ``docker://ubuntu:latest``. Once the ``docker_ubuntu_latest.sif``
-image is in the cache, ``singularity-permanent-cache`` will never check
-for a newer version!
+.. warning::
 
-Use containers with stable tags, such as `biocontainers
-<https://biocontainers.pro>`_ or use hashes. (For example:
-``ubuntu@sha256:a69390df0911533dd2fc552a8765481bf6a93b5d5952a9ddbe9cb64ca3479e17``.)
+    Do not use ``singularity-permanent-cache`` on images with unstable tags
+    such as ``docker://ubuntu:latest``. Once the ``docker_ubuntu_latest.sif``
+    image is in the cache, ``singularity-permanent-cache`` will never check
+    for a newer version!
 
-singularity-permanent-cache utilizes a filelock which only works if
-multiple singularity-permanent-cache processes are launched on the same
-machine. If multiple processes are launched on multiple machines connected
-to the same networked filesystem then cache corruption may occur.
+    Use containers with stable tags, such as `biocontainers
+    <https://biocontainers.pro>`_ or use hashes. (For example:
+    ``ubuntu@sha256:a69390df0911533dd2fc552a8765481bf6a93b5d5952a9ddbe9cb64ca3479e17``.)
+
+.. note::
+
+    singularity-permanent-cache utilizes a filelock which only works if
+    multiple singularity-permanent-cache processes are launched on the same
+    machine. If multiple processes are launched on multiple machines connected
+    to the same networked filesystem then cache corruption may occur.
 
 Usage
 ----------------
