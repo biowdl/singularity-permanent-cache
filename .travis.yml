@@ -1,0 +1,35 @@
+language: python
+install:
+  # Install singularity from source
+  - sudo apt update
+  - >-
+    sudo apt install --no-install-recommends golang-go build-essential libssl-dev
+    uuid-dev libgpgme-dev squashfs-tools libseccomp-dev wget pkg-config git
+    cryptsetup
+  - export VERSION=3.4.2
+  - wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-${VERSION}.tar.gz
+  - tar -xzf singularity-${VERSION}.tar.gz
+  - cd singularity && ./mconfig &&  make -C builddir && sudo make -C builddir install
+  - singularity version  # for debugging
+  - pip install tox
+dist: bionic
+python: 3.5  # Use the oldest supported version of python as default.
+script:
+    - tox -e $TOX_ENV
+matrix:
+  include:
+    - env: TOX_ENV=lint
+      install:
+        - pip install tox
+    # UNIT TESTS
+    # On most recent versions of python.
+    - env: TOX_ENV=py35
+      after_success:
+        - pip install codecov
+        - codecov -v  # -v to make sure coverage upload works.
+    - python: 3.6
+      env: TOX_ENV=py36
+    - python: 3.7
+      env: TOX_ENV=py37
+    - python: 3.8
+      env: TOX_ENV=py38
