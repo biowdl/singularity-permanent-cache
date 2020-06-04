@@ -24,7 +24,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="singularity-permanent-cache",
-    version="1.0.0-alpha",
+    version="1.0.0-dev",
     description="Creates a permanent cache for singularity images on disk.",
     author="Leiden University Medical Center",
     author_email="sasc@lumc.nl",  # A placeholder for now
