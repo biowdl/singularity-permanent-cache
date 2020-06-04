@@ -44,7 +44,9 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Development Status :: 3 - Alpha",
-        "License :: OSI Approved :: MIT License"
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: Unix",
+        "Typing :: Typed"
     ],
     python_requires=">=3.5",  # Because we use typing.
     entry_points={
