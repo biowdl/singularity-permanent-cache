@@ -9,6 +9,8 @@ Changelog
 
 version 1.0.0-alpha
 ---------------------------
++ Added a ``--which-cache`` flag for users to determine which cache will be
+  used from the environment.
 + Implemented a simple unix filelock to prevent race conditions.
 + Integrated functionality to determine the cache from environment variables.
 + Created a ``singularity-permanent-cache`` package that wraps the
