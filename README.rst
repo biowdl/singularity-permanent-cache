@@ -1,5 +1,32 @@
+===========================
 singularity-permanent-cache
 ===========================
+
+.. Badges have empty alts. So nothing shows up if they do not work.
+.. This fixes readthedocs issues with badges.
+.. image:: https://img.shields.io/pypi/v/singularity-permanent-cache.svg
+  :target: https://pypi.org/project/singularity-permanent-cache/
+  :alt:
+
+.. image:: https://img.shields.io/conda/v/conda-forge/singularity-permanent-cache.svg
+  :target: https://anaconda.org/conda-forge/singularity-permanent-cache
+  :alt:
+
+.. image:: https://img.shields.io/pypi/pyversions/singularity-permanent-cache.svg
+  :target: https://pypi.org/project/singularity-permanent-cache/
+  :alt:
+
+.. image:: https://img.shields.io/pypi/l/singularity-permanent-cache.svg
+  :target: https://github.com/biowdl/singularity-permanent-cache/blob/master/LICENSE
+  :alt:
+
+.. image:: https://travis-ci.com/biowdl/singularity-permanent-cache.svg?branch=develop
+  :target: https://travis-ci.com/biowdl/singularity-permanent-cache
+  :alt:
+
+.. image:: https://codecov.io/gh/biowdl/singularity-permanent-cache/branch/develop/graph/badge.svg
+  :target: https://codecov.io/gh/biowdl/singularity-permanent-cache
+  :alt:
 
 Singularity-permanent-cache creates a permanent cache for singularity images on
 disk. It takes a URI as argument and returns the location of the image. It
